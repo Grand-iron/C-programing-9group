@@ -35,7 +35,7 @@ onebone:
 	//데이터 파일 복구 식 넣기
 	goto onebone; //복구 끝난뒤 다시 onnbone으로 이동.
 finish:
-	printf("사용해주셔서 감사합니다.");
+	printf("사용해주셔서 감사합니다. 다음에 또 사용해주세요.");
 	return 0;
 }
 
