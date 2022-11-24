@@ -1,0 +1,5 @@
+Kim Computer_science 2022001 20 4.1
+Lee art 2022002 21 3.8
+Park media 2022003 22 3.2
+Choi Physical_Education 2022004 24 4.0
+Jeong Computer_science 2022005 60 4.5

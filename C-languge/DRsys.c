@@ -3,6 +3,7 @@
 #include <stdlib.h> // rand 함수 쓰기위해 넣음
 #include <time.h>  // srand값을 랜덤으로 바꾸기 위해 넣음
 #include <windows.h>
+#include <string.h>
 
 typedef struct _Student
 {
@@ -13,27 +14,25 @@ typedef struct _Student
 	double grade;   //학점
 
 }Student; //구조체에 별칭을 지정, 전역변수
-
 void loading(void);  //로딩창을 보여준다.
 int menu(void);      //메뉴창 출력 및 원하는 학생의 정보를 입력을 받는다.
+void Make_struct(Student* student, char file_name[20]);
 void s_print(Student* student, char name[20], int q);  //원하는 메뉴에 맞는 답을 밑 s_로 시작하는 4개의 함수를 이용하여 출력해준다.
-void s_class(Student* student, int a);    //학과 출력 
-void s_num(Student* student, int a);       //학번 출력 
-void s_age(Student* student, int a);       //나이 반환 
-void s_grade(Student* student, int a);     //학점 반환
+void s_Class(Student* student, int a);    //학과 출력 
+void s_Num(Student* student, int a);       //학번 출력 
+void s_Age(Student* student, int a);       //나이 반환 
+void s_Grade(Student* student, int a);     //학점 반환
+void Active_Active(int* Text_name);
 int main() {
-boot:                                      //데이터 초기화 및 로딩창을 출력한다.
+	char* Data = "Data.txt", oryu[] = { "(오류발생)" };;
+	char buffer[1001], * token;
+	int i = 0, idx = 0;
 	srand((unsigned int)time(NULL));          //랜덤이 일정하지 않게 해줌
-	char oryu[] = { "(오류발생)" };          //오류 발생했다는걸 알려주기 위한 문장
-	int i = 0;                               //몇번을 반복할지를 정해줌	
-	Student student[] = {           //구조체 배열의 초기화
-		{"Kim","Computer science",2022001,20,4.1},
-		{"Lee","art",2022002,21,3.8},
-		{"Park","media",2022003,22,3.2},
-		{"Choi","Physical Education",2022004,24,4.0},
-		{"Jeong","Computer science", 2022005,60,4.5},
-	};
+	Student student[100], student_save[100];
+	FILE* Data_File;
+	Make_struct(student, Data);
 	loading();                             //로딩한다.
+boot:
 	printf("현재 정보가 입력된 학생의 이름\n");   //입력된 학생들을 알려줌
 	for (i = 0; i < 5; i++)
 		printf("%s\n", student[i].name);
@@ -47,26 +46,49 @@ boot:                                      //데이터 초기화 및 로딩창�
 				student[i].age = -r_int;
 				student[i].grade = -r_int;
 				strcat(student[i].class, oryu);
+				Data_File = fopen(Data, "w");
+				fputs("Error Error 데이터 수정 필요", Data_File);
+				fclose(Data_File);
 			}
 		}
-		if (changer == 4)                     //복구프로그램 발동시 67번 줄로 이동
-			break;
+		if (changer == 4) {
+			printf("1.Backup and Restore \n2.Active / Active \n");
+			scanf("%d", &changer);
+			if (changer == 1) {
+				printf("프로그램을 종료합니다. 학생 데이터 파일을 수정 후 다시 실행해주세요.");
+				break;
+			}
+			else {
+				Active_Active(&Data);
+				Make_struct(student_save, Data);
+				for (i = 0; i < 5; i++) {
+					student[i] = student_save[i];
+				}
+				goto boot;
+			}
+		}
+
 		else if (changer < 4 && changer >= 0) {
-			printf("정보를 찾을 학생의 이름을 입력하세요 :");//학생 정보를 출력하기 전 이름을 입력받기 위함
+			printf("정보를 찾을 학생의 이름을 입력하세요(대소문자 구분 O) :");//학생 정보를 출력하기 전 이름을 입력받기 위함
 			scanf("%s", name);
 			s_print(student, name, changer);   //원하는 정보를 출력해줌.
 		}
 		else if (changer == 5)
-			goto finish;  //프로그램 끝내기
+			goto finish;  //프로그램 끝내기 break와 같은 의미 (goto를 쓰는 목적으로 goto 사용).
 		else {  //이상한 값 적을시 프로그램을 끝내버림
 			printf("잘못된 범위의 값을 입력하셨습니다. 프로그램을 종료합니다.\n");
-			goto finish;
+			break;
 		}
 	}
-	goto boot;
-finish:
-	printf("사용해주셔서 감사합니다.");
-	Sleep(1000);  //1초간 프로그램 작동안함
+
+finish:        //프로그램 종료 구문
+	printf("사용해주셔서 감사합니다.\n");
+	printf("바뀐 Data.txt 파일 원본은 Data3.txt에 새로 만들어 놨습니다.");
+	FILE* Data_file;
+	Data_file = fopen("Data3.txt", "w");
+	fputs("Kim Computer_science 2022001 20 4.1\nLee art 2022002 21 3.8\nPark media 2022003 22 3.2\nChoi Physical_Education 2022004 24 4.0\nJeong Computer_science 2022005 60 4.5", Data_file);
+	fclose(Data_file);
+	Sleep(3000);  //1초간 프로그램 작동안함
 	system("cls");  //화면 지우기
 	return 0;
 }
@@ -98,7 +120,7 @@ void loading(void) {  //로딩창
 	}
 	Sleep(200);
 	system("cls");
-	printf("부팅 완료!\n\n");
+	printf("부팅 완료!\n");
 	Sleep(1000);
 	system("cls");
 	return 0;
@@ -115,27 +137,80 @@ int menu(void) {
 	printf("5. 종료\n");
 	printf("**************************************\n");
 	scanf("%d", &changer);
+
 	return changer;
 }
 void s_print(Student* student, char name[20], int s_want) {
-	void (*s_infomation[4])(Student * student, int) = { s_class, s_num, s_age, s_grade };
+	void (*s_infomation[4])(Student * student, int) = { s_Class, s_Num, s_Age, s_Grade };
+	int count = 0;
 	for (int i = 0; i < 5; i++)
 	{
 		if (strcmp(name, student[i].name) == 0) {
 			s_infomation[s_want](student, i);
 		}
-
+		else
+			count += 1;
+		if (count == 5)
+			printf("\n찾으시는 학생이 존재하지 않습니다. 초기화면으로 돌아갑니다.\n\n");
 	}
 };
-void s_class(Student* student, int i) {
-	printf("\n%s학생의 학과는 %s입니다.\n", student[i].name, student[i].class);
+void s_Class(Student* student, int i) {
+	Student* point;
+	point = &student[i];
+	printf("\n%s학생의 학과는 %s입니다.\n\n", point->name, point->class);
 }
-void s_num(Student* student, int i) {
-	printf("\n%s학생의 학번은 %d입니다.\n", student[i].name, student[i].number);
+void s_Num(Student* student, int i) {
+	Student* point;
+	point = &student[i];
+	printf("\n%s학생의 학번은 %d입니다.\n\n", point->name, point->number);
 }
-void s_age(Student* student, int i) {
-	printf("\n%s학생의 나이는 %d입니다.\n", student[i].name, student[i].age);
+void s_Age(Student* student, int i) {
+	printf("\n%s학생의 나이는 %d입니다.\n\n", student[i].name, student[i].age);
 }
-void s_grade(Student* student, int i) {
-	printf("\n%s학생의 학점은 %.1lf입니다.\n", student[i].name, student[i].grade);
+void s_Grade(Student* student, int i) {
+	printf("\n%s학생의 학점은 %.1lf입니다.\n\n", student[i].name, student[i].grade);
+}
+
+void Active_Active(int* Text_name) {
+	int** a = &Text_name;
+	printf("같은 내용이 담긴 다른 데이터 파일로 교체합니다.\n");
+	**a = "Data2.txt";
+}
+void Make_struct(Student* student, char file_name[20]) {
+	char buffer[1001], * token;
+	int i = 0, idx = 0;
+	FILE* Data_File;
+	Data_File = fopen(file_name, "r");
+	if (Data_File == NULL) {
+		printf("fail to read file");
+		return 0;
+	}
+	while (!feof(Data_File)) {
+		i = 0;//i초기화
+
+		fgets(buffer, 1001, Data_File);
+		token = strtok(buffer, " "); // 
+		while (token != NULL) {
+			if (i == 0) {
+				strcpy(student[idx].name, token);
+			}
+			else if (i == 1) {
+				strcpy(student[idx].class, token);
+			}
+			else if (i == 2) {
+				student[idx].number = atoi(token);
+			}
+			else if (i == 3) {
+				student[idx].age = atoi(token);
+			}
+			else if (i == 4) {
+				student[idx].grade = atof(token);
+			}
+			i++;
+
+			token = strtok(NULL, " ");
+		}
+		idx++;
+	}
+	fclose(Data_File);
 }
